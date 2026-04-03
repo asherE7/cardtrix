@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Admin Dashboard</h1>
+
+    <!-- Login Screen -->
+    <div id="loginScreen">
+
+        <h2>Enter Admin Password</h2>
+
+        <input type="password" id="adminPassword" placeholder="Password">
+
+        <br><br>
+
+        <button onclick="unlockAdmin()">Unlock</button>
+
+    </div>
+
+    <!-- Admin Content (hidden until login) -->
+    <div id="adminContent" style="display:none;">
+
+        <h2>Upload Video</h2>
+
+        <input type="file" id="videoFile" accept="video/*">
+
+        <br><br>
+
+        <button onclick="uploadVideo()">Upload Video</button>
+
+        <div id="progressBarContainer">
+            <div id="progressBar"></div>
+        </div>
+
+        <hr>
+        
+        <h2>Promo Code Manager</h2>
+        
+        <input type="text" id="newCode" placeholder="New promo code">
+        
+        <button onclick="addCode()">Add Code</button>
+        
+        <br><br>
+        
+        <button onclick="loadCodes()">Refresh Codes</button>
+        
+        <ul id="codeList"></ul>
+        <script src="admin.js"></script>
+</html>
