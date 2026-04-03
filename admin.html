@@ -17,6 +17,23 @@
     <br><br>
 
     <button onclick="uploadVideo()">Upload Video</button>
+    <div id="progressBarContainer">
+        <div id="progressBar"></div>
+    </div>
+
+    <hr>
+    
+    <h2>Promo Code Manager</h2>
+    
+    <input type="text" id="newCode" placeholder="New promo code">
+    
+    <button onclick="addCode()">Add Code</button>
+    
+    <br><br>
+    
+    <button onclick="loadCodes()">Refresh Codes</button>
+    
+    <ul id="codeList"></ul>
 
     <script src="admin.js"></script>
 
