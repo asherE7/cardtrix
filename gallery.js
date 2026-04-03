@@ -36,8 +36,27 @@ function loadVideos() {
 
                 if (href.endsWith(".mp4") || href.endsWith(".webm")) {
                     const video = document.createElement("video");
+
                     video.src = "videos/" + href;
+
                     video.controls = true;
+
+                    /* PERFORMANCE SETTINGS */
+                    video.preload = "metadata";   // load only video info first
+                    video.loading = "lazy";       // don't load until visible
+                    video.width = "100%";
+
+                    video.setAttribute("playsinline", true);
+                    video.setAttribute("controlsList", "nodownload");
+
+                    /* Show loading feedback */
+                    video.addEventListener("waiting", () => {
+                        console.log("Buffering video...");
+                    });
+
+                    video.addEventListener("canplay", () => {
+                        console.log("Ready to play");
+                    });
 
                     container.appendChild(video);
                 }

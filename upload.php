@@ -1,6 +1,6 @@
 <?php
 
-$admin_password = "a$her3699!";
+$admin_password = "a";
 
 if ($_POST['password'] !== $admin_password) {
     http_response_code(403);

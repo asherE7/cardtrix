@@ -2,41 +2,54 @@
 <html>
 
 <head>
-    <title>Admin Upload</title>
+    <title>Admin Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <h1>Admin Upload</h1>
+    <h1>Admin Dashboard</h1>
 
-    <input type="password" id="adminPassword" placeholder="Admin password">
-    <br><br>
+    <!-- Login Screen -->
+    <div id="loginScreen">
 
-    <input type="file" id="videoFile" accept="video/*">
-    <br><br>
+        <h2>Enter Admin Password</h2>
 
-    <button onclick="uploadVideo()">Upload Video</button>
-    <div id="progressBarContainer">
-        <div id="progressBar"></div>
+        <input type="password" id="adminPassword" placeholder="Password">
+
+        <br><br>
+
+        <button onclick="unlockAdmin()">Unlock</button>
+
     </div>
 
-    <hr>
-    
-    <h2>Promo Code Manager</h2>
-    
-    <input type="text" id="newCode" placeholder="New promo code">
-    
-    <button onclick="addCode()">Add Code</button>
-    
-    <br><br>
-    
-    <button onclick="loadCodes()">Refresh Codes</button>
-    
-    <ul id="codeList"></ul>
+    <!-- Admin Content (hidden until login) -->
+    <div id="adminContent" style="display:none;">
 
-    <script src="admin.js"></script>
+        <h2>Upload Video</h2>
 
-</body>
+        <input type="file" id="videoFile" accept="video/*">
 
+        <br><br>
+
+        <button onclick="uploadVideo()">Upload Video</button>
+
+        <div id="progressBarContainer">
+            <div id="progressBar"></div>
+        </div>
+
+        <hr>
+        
+        <h2>Promo Code Manager</h2>
+        
+        <input type="text" id="newCode" placeholder="New promo code">
+        
+        <button onclick="addCode()">Add Code</button>
+        
+        <br><br>
+        
+        <button onclick="loadCodes()">Refresh Codes</button>
+        
+        <ul id="codeList"></ul>
+        <script src="admin.js"></script>
 </html>

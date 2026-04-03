@@ -1,3 +1,25 @@
+alert("admin.js loaded");
+let storedPassword = "";
+
+function unlockAdmin() {
+
+    const password = document.getElementById("adminPassword").value;
+
+    if (!password) {
+        alert("Enter password");
+        return;
+    }
+
+    storedPassword = password;
+
+    document.getElementById("loginScreen").style.display = "none";
+
+    document.getElementById("adminContent").style.display = "block";
+
+    loadCodes();
+
+}
+
 function uploadVideo() {
 
     const password = document.getElementById("adminPassword").value;
@@ -9,7 +31,7 @@ function uploadVideo() {
     }
 
     const formData = new FormData();
-    formData.append("password", password);
+    formData.append("password", storedPassword);
     formData.append("video", file);
 
     const xhr = new XMLHttpRequest();
@@ -85,4 +107,20 @@ function addCode() {
 }
 
 function deleteCode(code) {
-    window.onload = loadCodes;
+
+    fetch("manage_codes.php?action=delete", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+
+        body: "code=" + encodeURIComponent(code)
+
+    })
+        .then(() => loadCodes());
+
+}
+
+window.onload = loadCodes;
