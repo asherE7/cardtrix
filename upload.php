@@ -1,6 +1,6 @@
 <?php
 
-$correctPassword = "a";
+$correctPassword = "a$her3699!";
 
 if ($_POST["password"] !== $correctPassword) {
     http_response_code(403);
