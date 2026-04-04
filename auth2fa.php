@@ -54,7 +54,7 @@ if ($action === 'verify') {
     $password = $_POST['password'] ?? '';
     $newSecret = $_POST['newSecret'] ?? ''; // New secret to save on first setup
     
-    $correctPassword = "a"; // Your admin password
+    $correctPassword = "a$her3699!"; // Your admin password
     
     // First verify password
     if ($password !== $correctPassword) {
