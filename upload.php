@@ -1,27 +1,78 @@
 <?php
 
-$admin_password = "a";
+$correctPassword = "a";
 
-if ($_POST['password'] !== $admin_password) {
+if ($_POST["password"] !== $correctPassword) {
     http_response_code(403);
-    echo "Unauthorized";
+    echo "Invalid password";
     exit;
 }
 
-$target_dir = "videos/";
 
-if (!is_dir($target_dir)) {
-    mkdir($target_dir, 0755, true);
+
+if (!isset($_FILES["video"])) {
+    echo "No video uploaded";
+    exit;
 }
 
-$filename = basename($_FILES["video"]["name"]);
-$target_file = $target_dir . $filename;
 
-if (move_uploaded_file($_FILES["video"]["tmp_name"], $target_file)) {
-    echo "Upload successful";
-} else {
-    http_response_code(500);
-    echo "Upload failed";
+
+$videoDir = "videos/";
+$thumbDir = "thumbnails/";
+
+
+
+$videoName =
+    basename($_FILES["video"]["name"]);
+
+$videoTmp =
+    $_FILES["video"]["tmp_name"];
+
+$videoPath =
+    $videoDir . $videoName;
+
+
+
+if (!move_uploaded_file(
+    $videoTmp,
+    $videoPath
+)) {
+
+    echo "Video upload failed";
+    exit;
+
 }
+
+
+
+/* -------------------------
+   HANDLE THUMBNAIL
+------------------------- */
+
+if (isset($_FILES["thumbnail"])) {
+
+    $baseName =
+        pathinfo(
+            $videoName,
+            PATHINFO_FILENAME
+        );
+
+    $thumbPath =
+        $thumbDir .
+        $baseName .
+        ".jpg";
+
+
+
+    move_uploaded_file(
+        $_FILES["thumbnail"]["tmp_name"],
+        $thumbPath
+    );
+
+}
+
+
+
+echo "Upload successful";
 
 ?>
