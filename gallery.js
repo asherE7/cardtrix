@@ -24,7 +24,6 @@ function checkCode() {
             if (res.ok) {
 
                 document.getElementById("promoSection").style.display = "none";
-
                 document.getElementById("gallery").style.display = "block";
 
                 loadVideos();
@@ -40,7 +39,6 @@ function checkCode() {
         .catch(err => {
 
             console.error("Promo check failed:", err);
-
             alert("Server error checking code");
 
         });
@@ -72,12 +70,12 @@ function loadVideos() {
         .then(html => {
 
             const parser = new DOMParser();
-
             const doc = parser.parseFromString(html, "text/html");
 
             const links = doc.querySelectorAll("a");
 
-            const container = document.getElementById("videoContainer");
+            const container =
+                document.getElementById("videoContainer");
 
             container.innerHTML = "";
 
@@ -99,7 +97,13 @@ function loadVideos() {
 
                     videoCount++;
 
-                    createVideoPlayer(container, href.replace(/^.*\//, ""));
+                    const filename =
+                        href.split("/").pop();
+
+                    createVideoPlayer(
+                        container,
+                        filename
+                    );
 
                 }
 
@@ -112,15 +116,23 @@ function loadVideos() {
 
             }
 
-            console.log("Videos loaded:", videoCount);
+            console.log(
+                "Videos loaded:",
+                videoCount
+            );
 
         })
 
         .catch(err => {
 
-            console.error("Video loading error:", err);
+            console.error(
+                "Video loading error:",
+                err
+            );
 
-            document.getElementById("videoContainer").innerHTML =
+            document.getElementById(
+                "videoContainer"
+            ).innerHTML =
                 "<p>Error loading videos.</p>";
 
         });
@@ -135,71 +147,179 @@ function loadVideos() {
 
 function createVideoPlayer(container, filename) {
 
-    const wrapper = document.createElement("div");
+    const wrapper =
+        document.createElement("div");
 
     wrapper.style.marginBottom = "30px";
 
 
 
-    /* Clean filename */
+    /* ---------------------
+       CLEAN FILENAME
+    --------------------- */
 
     let cleanName = filename;
 
     if (cleanName.startsWith("videos/")) {
-        cleanName = cleanName.replace("videos/", "");
+        cleanName =
+            cleanName.replace("videos/", "");
     }
 
+    const baseName =
+        cleanName
+            .split("/")
+            .pop()
+            .replace(/\.[^/.]+$/, "");
 
 
-    /* Title */
 
-    const title = document.createElement("h3");
+    /* ---------------------
+       TITLE
+    --------------------- */
 
-    title.textContent = cleanName;
+    const title =
+        document.createElement("h3");
+
+    title.textContent = baseName;
 
     wrapper.appendChild(title);
 
 
 
-    /* Video */
+    /* ---------------------
+       THUMB CONTAINER
+    --------------------- */
 
-    const video = document.createElement("video");
+    const thumbContainer =
+        document.createElement("div");
 
-    video.controls = true;
+    thumbContainer.style.position =
+        "relative";
 
-    video.preload = "metadata";
-
-    video.style.width = "100%";
-
-    video.style.background = "black";
-
-
-
-    const source = document.createElement("source");
-
-    source.src = "videos/" + cleanName;
-
-    source.type = getVideoType(cleanName);
+    thumbContainer.style.cursor =
+        "pointer";
 
 
 
-    video.appendChild(source);
+    /* ---------------------
+       THUMBNAIL IMAGE
+    --------------------- */
 
-    video.load();
+    const thumbnail =
+        document.createElement("img");
+
+    thumbnail.src =
+        "thumbnails/" +
+        baseName +
+        ".jpg";
+
+    thumbnail.alt = cleanName;
+
+    thumbnail.style.width = "100%";
+    thumbnail.style.display = "block";
+    thumbnail.style.background =
+        "black";
+
+    thumbnail.style.borderRadius =
+        "8px";
 
 
 
-    video.addEventListener("error", () => {
+    /* ---------------------
+       PLAY BUTTON
+    --------------------- */
 
-        console.error("Video failed:", source.src);
+    // Play button removed - click thumbnail to play
 
-    });
+    thumbContainer.appendChild(
+        thumbnail
+    );
+
+    // thumbContainer.appendChild(
+    //     playButton
+    // );
 
 
 
-    wrapper.appendChild(video);
+    /* ---------------------
+       CLICK → LOAD VIDEO
+    --------------------- */
 
-    container.appendChild(wrapper);
+    thumbContainer.addEventListener(
+        "click",
+        () => {
+
+            console.log(
+                "Loading video:",
+                cleanName
+            );
+
+            const video =
+                document.createElement(
+                    "video"
+                );
+
+            video.controls = true;
+
+            video.autoplay = true;
+
+            video.style.width =
+                "100%";
+
+            video.style.background =
+                "black";
+
+
+
+            const source =
+                document.createElement(
+                    "source"
+                );
+
+            source.src =
+                "videos/" +
+                cleanName;
+
+            source.type =
+                getVideoType(
+                    cleanName
+                );
+
+            video.appendChild(source);
+
+
+
+            video.addEventListener(
+                "error",
+                () => {
+
+                    console.error(
+                        "Video failed:",
+                        source.src
+                    );
+
+                }
+            );
+
+
+
+            wrapper.replaceChild(
+                video,
+                thumbContainer
+            );
+
+        }
+    );
+
+
+
+    wrapper.appendChild(
+        thumbContainer
+    );
+
+    container.appendChild(
+        wrapper
+    );
 
 }
 
@@ -211,7 +331,8 @@ function createVideoPlayer(container, filename) {
 
 function getVideoType(filename) {
 
-    const lower = filename.toLowerCase();
+    const lower =
+        filename.toLowerCase();
 
     if (lower.endsWith(".mp4"))
         return "video/mp4";

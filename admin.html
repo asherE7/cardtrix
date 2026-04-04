@@ -19,37 +19,61 @@
 
         <br><br>
 
-        <button onclick="unlockAdmin()">Unlock</button>
+        <button onclick="unlockAdmin()">
+            Unlock
+        </button>
 
     </div>
 
-    <!-- Admin Content (hidden until login) -->
+    <!-- Admin Content -->
     <div id="adminContent" style="display:none;">
 
         <h2>Upload Video</h2>
 
+        <label>Video File:</label>
+        <br>
         <input type="file" id="videoFile" accept="video/*">
 
         <br><br>
 
-        <button onclick="uploadVideo()">Upload Video</button>
+        <label>Thumbnail Image:</label>
+        <br>
+        <input type="file" id="thumbnailFile" accept="image/jpeg,image/png">
+
+        <br><br>
+
+        <button onclick="uploadVideo()">
+            Upload Video + Thumbnail
+        </button>
+
+        <br><br>
 
         <div id="progressBarContainer">
             <div id="progressBar"></div>
         </div>
 
         <hr>
-        
+
         <h2>Promo Code Manager</h2>
-        
+
         <input type="text" id="newCode" placeholder="New promo code">
-        
-        <button onclick="addCode()">Add Code</button>
-        
+
+        <button onclick="addCode()">
+            Add Code
+        </button>
+
         <br><br>
-        
-        <button onclick="loadCodes()">Refresh Codes</button>
-        
+
+        <button onclick="loadCodes()">
+            Refresh Codes
+        </button>
+
         <ul id="codeList"></ul>
-        <script src="admin.js"></script>
+
+    </div>
+
+    <script src="admin.js"></script>
+
+</body>
+
 </html>
