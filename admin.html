@@ -4,13 +4,60 @@
 <head>
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .twoFAContainer {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 10px;
+        }
+
+        .qrCode {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .qrCode img {
+            max-width: 300px;
+            border-radius: 8px;
+            border: 2px solid #2563eb;
+        }
+
+        .secretDisplay {
+            background: #0f172a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+            border-left: 3px solid #2563eb;
+        }
+
+        .instructions {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .codeInput {
+            font-size: 32px !important;
+            letter-spacing: 5px;
+            text-align: center;
+            font-family: monospace;
+            width: 200px;
+        }
+    </style>
 </head>
 
 <body>
 
     <h1>Admin Dashboard</h1>
 
-    <!-- Login Screen -->
+    <!-- Step 1: Password Login -->
     <div id="loginScreen">
 
         <h2>Enter Admin Password</h2>
@@ -19,13 +66,63 @@
 
         <br><br>
 
-        <button onclick="unlockAdmin()">
-            Unlock
+        <button onclick="verifyPassword()">
+            Next
         </button>
 
     </div>
 
-    <!-- Admin Content -->
+    <!-- Step 2: 2FA Setup/Verify -->
+    <div id="twoFAScreen" style="display:none;">
+
+        <div class="twoFAContainer">
+
+            <h2>Two-Factor Authentication</h2>
+
+            <div id="setupMode" style="display:none;">
+
+                <div class="instructions">
+                    <strong>First Time Setup:</strong><br>
+                    1. Download an authenticator app:<br>
+                    &nbsp;&nbsp;• Google Authenticator<br>
+                    &nbsp;&nbsp;• Microsoft Authenticator<br>
+                    &nbsp;&nbsp;• Authy<br>
+                    2. Scan the QR code below<br>
+                    3. Enter the 6-digit code
+                </div>
+
+                <div class="qrCode">
+                    <img id="qrCodeImg" src="" alt="QR Code">
+                </div>
+
+                <div style="text-align: center; margin: 15px 0;">
+                    <small>Can't scan? Enter manually:</small>
+                    <div class="secretDisplay" id="secretDisplay"></div>
+                </div>
+
+            </div>
+
+            <div id="verifyMode">
+                <p>Enter the 6-digit code from your authenticator app:</p>
+            </div>
+
+            <input type="text" id="totpCode" class="codeInput" placeholder="000000" maxlength="6">
+
+            <br><br>
+
+            <button onclick="verify2FA()">
+                Verify & Login
+            </button>
+
+            <button onclick="goBack()" style="background: #6b7280;">
+                Back
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Step 3: Admin Content -->
     <div id="adminContent" style="display:none;">
 
         <h2>Upload Video</h2>
@@ -69,6 +166,16 @@
         </button>
 
         <ul id="codeList"></ul>
+
+        <hr>
+
+        <h2>2FA Management</h2>
+
+        <button onclick="reset2FA()" style="background: #dc2626;">
+            Reset 2FA Setup
+        </button>
+
+        <p><small>Click to re-scan authenticator or use a different device</small></p>
 
     </div>
 
