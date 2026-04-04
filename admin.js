@@ -1,8 +1,20 @@
-alert("admin.js loaded");
-
 let storedPassword = "";
+let tempSecret = "";
 
-function unlockAdmin() {
+/* ========================
+   FORMAT SECRET WITH SPACES
+======================== */
+
+function formatSecret(secret) {
+    // Add spaces every 4 characters for easier reading
+    return secret.replace(/(.{4})/g, '$1 ').trim();
+}
+
+/* ========================
+   STEP 1: VERIFY PASSWORD
+======================== */
+
+function verifyPassword() {
 
     const password =
         document.getElementById("adminPassword").value;
@@ -14,17 +26,162 @@ function unlockAdmin() {
 
     storedPassword = password;
 
-    document.getElementById("loginScreen")
-        .style.display = "none";
+    // Get 2FA secret or setup
+    fetch("auth2fa.php?action=getSecret")
+        .then(res => res.json())
+        .then(data => {
 
-    document.getElementById("adminContent")
-        .style.display = "block";
+            if (data.status === 'new') {
+                // First time setup
+                tempSecret = data.secret;
+                setupNewTotp(data.qrUrl, data.secret);
+            } else {
+                // Already configured, just verify
+                showVerifyMode();
+            }
 
-    loadCodes();
+            // Show 2FA screen
+            document.getElementById("loginScreen").style.display = "none";
+            document.getElementById("twoFAScreen").style.display = "block";
+
+        })
+        .catch(err => {
+            console.error("2FA error:", err);
+            alert("Failed to load 2FA");
+        });
 
 }
 
+/* ========================
+   SETUP NEW TOTP
+======================== */
 
+function setupNewTotp(qrUrl, secret) {
+
+    document.getElementById("setupMode").style.display = "block";
+    document.getElementById("verifyMode").style.display = "none";
+
+    // Show QR code
+    document.getElementById("qrCodeImg").src = qrUrl;
+
+    // Show secret for manual entry
+    document.getElementById("secretDisplay").textContent = formatSecret(secret);
+
+}
+
+/* ========================
+   SHOW VERIFY MODE
+======================== */
+
+function showVerifyMode() {
+
+    document.getElementById("setupMode").style.display = "none";
+    document.getElementById("verifyMode").style.display = "block";
+
+}
+
+/* ========================
+   STEP 2: VERIFY 2FA CODE
+======================== */
+
+function verify2FA() {
+
+    const code =
+        document.getElementById("totpCode").value.trim();
+
+    if (!code || code.length !== 6) {
+        alert("Enter a valid 6-digit code");
+        return;
+    }
+
+    // Prepare body - send tempSecret if this is first-time setup
+    let body = "password=" + encodeURIComponent(storedPassword) +
+        "&code=" + encodeURIComponent(code);
+
+    if (tempSecret) {
+        body += "&newSecret=" + encodeURIComponent(tempSecret);
+    }
+
+    fetch("auth2fa.php?action=verify", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: body
+    })
+        .then(res => {
+
+            if (res.ok) {
+                return res.json();
+            } else {
+                return res.json().then(data => {
+                    throw new Error(data.message || "Verification failed");
+                });
+            }
+
+        })
+        .then(data => {
+
+            if (data.success) {
+                // Login successful!
+                document.getElementById("twoFAScreen").style.display = "none";
+                document.getElementById("adminContent").style.display = "block";
+                loadCodes();
+            }
+
+        })
+        .catch(err => {
+            console.error("2FA verification error:", err);
+            alert("Invalid 2FA code. Try again.\n\n" + err.message);
+        });
+
+}
+
+/* ========================
+   GO BACK TO PASSWORD
+======================== */
+
+function goBack() {
+
+    document.getElementById("adminPassword").value = "";
+    document.getElementById("totpCode").value = "";
+    document.getElementById("loginScreen").style.display = "block";
+    document.getElementById("twoFAScreen").style.display = "none";
+
+}
+
+/* ========================
+   RESET 2FA SETUP
+======================== */
+
+function reset2FA() {
+
+    if (!confirm("Reset 2FA? You'll need to re-scan with your authenticator app.")) {
+        return;
+    }
+
+    fetch("auth2fa.php?action=reset", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "password=" + encodeURIComponent(storedPassword)
+    })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            location.reload();
+        })
+        .catch(err => {
+            console.error("Reset error:", err);
+            alert("Failed to reset 2FA");
+        });
+
+}
+
+/* ========================
+   UPLOAD VIDEO
+======================== */
 
 function uploadVideo() {
 
@@ -61,8 +218,6 @@ function uploadVideo() {
         thumbnail
     );
 
-
-
     const xhr = new XMLHttpRequest();
 
     xhr.upload.addEventListener(
@@ -88,8 +243,6 @@ function uploadVideo() {
         }
     );
 
-
-
     xhr.onload = function () {
 
         alert(xhr.responseText);
@@ -102,8 +255,6 @@ function uploadVideo() {
 
     };
 
-
-
     xhr.open(
         "POST",
         "upload.php"
@@ -113,7 +264,9 @@ function uploadVideo() {
 
 }
 
-
+/* ========================
+   PROMO CODE MANAGEMENT
+======================== */
 
 function loadCodes() {
 
@@ -149,8 +302,6 @@ function loadCodes() {
 
 }
 
-
-
 function addCode() {
 
     const code =
@@ -169,11 +320,12 @@ function addCode() {
                 encodeURIComponent(code)
         }
     )
-        .then(() => loadCodes());
+        .then(() => {
+            document.getElementById("newCode").value = "";
+            loadCodes();
+        });
 
 }
-
-
 
 function deleteCode(code) {
 
@@ -194,6 +346,7 @@ function deleteCode(code) {
 
 }
 
-
-
-window.onload = loadCodes;
+window.onload = function () {
+    // Remove the alert that was in the original
+    console.log("Admin dashboard loaded");
+};

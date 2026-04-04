@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>2FA Debug</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .debug-box {
+            background: #1e293b;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #10b981;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error {
+            color: #ef4444;
+        }
+
+        .success {
+            color: #10b981;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>2FA Diagnostic Tool</h1>
+
+    <div class="debug-box">
+        <h3>Test 1: Get Secret</h3>
+        <button onclick="testGetSecret()">Get Secret & QR Code</button>
+        <div id="test1-result"></div>
+    </div>
+
+    <div class="debug-box">
+        <h3>Test 2: Current Server Time</h3>
+        <button onclick="testServerTime()">Check Server Time</button>
+        <div id="test2-result"></div>
+    </div>
+
+    <div class="debug-box">
+        <h3>Test 3: Generate Test Code</h3>
+        <button onclick="testGenerateCode()">Generate Code (needs secret)</button>
+        <div id="test3-result"></div>
+    </div>
+
+    <div class="debug-box">
+        <h3>Test 4: Verify Code</h3>
+        Password: <input type="password" id="testPassword" placeholder="admin password" value="a"><br>
+        Code: <input type="text" id="testCode" placeholder="6-digit code" maxlength="6"><br>
+        <button onclick="testVerifyCode()">Test Verify</button>
+        <div id="test4-result"></div>
+    </div>
+
+    <script>
+        let currentSecret = "";
+
+        function testGetSecret() {
+            const resultDiv = document.getElementById("test1-result");
+            resultDiv.innerHTML = "<p>Loading...</p>";
+
+            fetch("auth2fa.php?action=getSecret")
+                .then(res => {
+                    console.log("Response status:", res.status);
+                    return res.text().then(text => {
+                        console.log("Raw response:", text);
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            throw new Error("Invalid JSON: " + text);
+                        }
+                    });
+                })
+                .then(data => {
+                    console.log("Parsed data:", data);
+                    console.log("Data status:", data.status);
+
+                    if (!data.status) {
+                        throw new Error("No status in response. Data: " + JSON.stringify(data));
+                    }
+
+                    if (data.status === 'new') {
+                        currentSecret = data.secret;
+                        resultDiv.innerHTML = `
+                            <p class="success">✓ Secret generated successfully</p>
+                            <p>Secret: ${data.secret}</p>
+                            <p>Status: ${data.status}</p>
+                            <p>QR URL: ${data.qrUrl ? data.qrUrl.substring(0, 80) + '...' : 'No QR URL'}</p>
+                            ${data.qrUrl ? '<img src="' + data.qrUrl + '" style="max-width: 200px; border: 2px solid #2563eb; margin-top: 10px;">' : ''}
+                        `;
+                    } else if (data.status === 'exists') {
+                        resultDiv.innerHTML = `
+                            <p class="success">✓ 2FA already configured</p>
+                            <p>${data.message}</p>
+                            <p>Delete data/2fa_secret.txt to reset</p>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `<p class="error">✗ Unknown status: ${data.status}</p><p>Full data: ${JSON.stringify(data)}</p>`;
+                    }
+                })
+                .catch(err => {
+                    console.error("Full error:", err);
+                    resultDiv.innerHTML = `<p class="error">✗ Error: ${err.message}</p>`;
+                });
+        }
+
+        function testServerTime() {
+            const resultDiv = document.getElementById("test2-result");
+            resultDiv.innerHTML = "<p>Loading...</p>";
+
+            fetch("debug_time.php")
+                .then(res => res.json())
+                .then(data => {
+                    const diff = Math.abs(Date.now() / 1000 - data.server_time);
+                    const status = diff < 5 ? "✓ GOOD" : "✗ OUT OF SYNC";
+                    resultDiv.innerHTML = `
+                        <p>Server Time: ${new Date(data.server_time * 1000).toISOString()}</p>
+                        <p>Your Time: ${new Date().toISOString()}</p>
+                        <p>Difference: ${Math.round(diff)} seconds</p>
+                        <p class="${diff < 5 ? 'success' : 'error'}">${status}</p>
+                    `;
+                })
+                .catch(err => {
+                    resultDiv.innerHTML = `<p class="error">✗ Error: ${err.message}</p>`;
+                });
+        }
+
+        function testGenerateCode() {
+            const resultDiv = document.getElementById("test3-result");
+            if (!currentSecret) {
+                resultDiv.innerHTML = `<p class="error">✗ Run Test 1 first to get secret</p>`;
+                return;
+            }
+            resultDiv.innerHTML = `<p>Secret: ${currentSecret}</p><p>See console for generated code</p>`;
+        }
+
+        function testVerifyCode() {
+            const resultDiv = document.getElementById("test4-result");
+            const password = document.getElementById("testPassword").value;
+            const code = document.getElementById("testCode").value;
+
+            if (!password || !code) {
+                resultDiv.innerHTML = `<p class="error">✗ Enter password and code</p>`;
+                return;
+            }
+
+            resultDiv.innerHTML = "<p>Testing...</p>";
+
+            fetch("auth2fa.php?action=verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "password=" + encodeURIComponent(password) + "&code=" + encodeURIComponent(code)
+            })
+                .then(res => {
+                    if (res.ok) {
+                        return res.json().then(data => {
+                            resultDiv.innerHTML = `<p class="success">✓ Success! Code verified</p>`;
+                        });
+                    } else {
+                        return res.json().then(data => {
+                            resultDiv.innerHTML = `<p class="error">✗ Failed: ${data.message}</p>`;
+                        });
+                    }
+                })
+                .catch(err => {
+                    resultDiv.innerHTML = `<p class="error">✗ Error: ${err.message}</p>`;
+                });
+        }
+    </script>
+
+</body>
+
+</html>
