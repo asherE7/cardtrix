@@ -26,9 +26,19 @@ function verifyPassword() {
 
     storedPassword = password;
 
-    // Get 2FA secret or setup
-    fetch("auth2fa.php?action=getSecret")
-        .then(res => res.json())
+    // Get 2FA secret or setup - NOW WITH PASSWORD VALIDATION
+    fetch("auth2fa.php?action=getSecret&password=" + encodeURIComponent(password))
+        .then(res => {
+
+            // CHECK FOR HTTP ERRORS (403 = invalid password)
+            if (!res.ok) {
+                return res.json().then(data => {
+                    throw new Error(data.message || "Authentication failed");
+                });
+            }
+
+            return res.json();
+        })
         .then(data => {
 
             if (data.status === 'new') {
@@ -40,14 +50,16 @@ function verifyPassword() {
                 showVerifyMode();
             }
 
-            // Show 2FA screen
+            // Show 2FA screen - ONLY REACHED IF PASSWORD IS CORRECT
             document.getElementById("loginScreen").style.display = "none";
             document.getElementById("twoFAScreen").style.display = "block";
 
         })
         .catch(err => {
-            console.error("2FA error:", err);
-            alert("Failed to load 2FA");
+            console.error("Password verification error:", err);
+            alert("Invalid password. Please try again.\n\n" + err.message);
+            // Clear the password field
+            document.getElementById("adminPassword").value = "";
         });
 
 }
