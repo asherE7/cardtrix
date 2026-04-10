@@ -26,7 +26,7 @@ function checkCode() {
                 document.getElementById("promoSection").style.display = "none";
                 document.getElementById("gallery").style.display = "block";
 
-                loadVideos();
+                loadVideoTitles();
 
             } else {
 
@@ -48,8 +48,28 @@ function checkCode() {
 
 
 /* =========================
-   LOAD VIDEOS
+   LOAD VIDEOS & TITLES
 ========================= */
+
+let videoTitles = {};
+
+function loadVideoTitles() {
+    // Load custom titles from backend
+    fetch("get_videos.php")
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.videos) {
+                data.videos.forEach(video => {
+                    videoTitles[video.basename] = video.title;
+                });
+            }
+            loadVideos();
+        })
+        .catch(err => {
+            console.error("Error loading titles:", err);
+            loadVideos();
+        });
+}
 
 function loadVideos() {
 
@@ -180,7 +200,7 @@ function createVideoPlayer(container, filename) {
     const title =
         document.createElement("h3");
 
-    title.textContent = baseName;
+    title.textContent = videoTitles[baseName] || baseName;
 
     wrapper.appendChild(title);
 
