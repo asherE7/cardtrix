@@ -245,6 +245,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -484,6 +485,7 @@
                 opacity: 0;
                 transform: translateX(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -552,12 +554,25 @@
         <!-- STEP 1: PASSWORD LOGIN -->
         <div id="loginScreen">
             <h2>Admin Access Required</h2>
-            <div class="formGroup">
-                <label>Enter Password</label>
-                <input type="password" id="adminPassword" placeholder="Enter admin password" style="width: 100%; padding: 12px; border: 1px solid #2563eb; border-radius: 8px; background: rgba(15, 23, 42, 0.6); color: #f1f5f9; font-size: 14px;">
-            </div>
-            <div class="buttonGroup" style="justify-content: center; margin-top: 30px;">
-                <button class="btnPrimary" onclick="verifyPassword()">Verify Password</button>
+            <form onsubmit="return verifyPassword(event)">
+                <div class="formGroup">
+                    <label>Enter Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter admin password"
+                        autocomplete="current-password"
+                        style="width: 100%; padding: 12px; border: 1px solid #2563eb; border-radius: 8px; background: rgba(15, 23, 42, 0.6); color: #f1f5f9; font-size: 14px;"
+                        required>
+                </div>
+                <div class="buttonGroup" style="justify-content: center; margin-top: 30px;">
+                    <button type="submit" class="btnPrimary">Verify Password</button>
+                </div>
+            </form>
+
+            <!-- Recovery link for first login after password change -->
+            <div id="recoveryLinkContainer"
+                style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #2563eb;">
+                <p style="color: #cbd5e1; margin-bottom: 10px;">Password not working? Try the old password:</p>
+                <button onclick="tryOldPassword()" class="btnSecondary" style="width: 100%;">Use Old Password
+                    (Recovery)</button>
             </div>
         </div>
 
@@ -587,11 +602,13 @@
 
                 <!-- Verify Mode -->
                 <div id="verifyMode">
-                    <p style="margin-bottom: 20px; color: #cbd5e1;">Enter the 6-digit code from your authenticator app:</p>
+                    <p style="margin-bottom: 20px; color: #cbd5e1;">Enter the 6-digit code from your authenticator app:
+                    </p>
                 </div>
 
                 <div style="text-align: center;">
-                    <input type="text" id="totpCode" class="codeInput" placeholder="000000" maxlength="6" inputmode="numeric">
+                    <input type="text" id="totpCode" class="codeInput" placeholder="000000" maxlength="6"
+                        inputmode="numeric">
                 </div>
 
                 <div class="buttonGroup" style="justify-content: center; margin-top: 30px;">
@@ -624,10 +641,22 @@
                             <div class="stepLabel">Review & Upload</div>
                         </div>
                     </li>
-                    <li class="stepItem disabled">
+                    <li class="stepItem disabled" onclick="goToStep(4)">
                         <div class="stepNumber">4</div>
                         <div>
-                            <div class="stepLabel">Manage Content</div>
+                            <div class="stepLabel">Manage Videos</div>
+                        </div>
+                    </li>
+                    <li class="stepItem disabled" onclick="goToStep(5)">
+                        <div class="stepNumber">5</div>
+                        <div>
+                            <div class="stepLabel">Manage Codes</div>
+                        </div>
+                    </li>
+                    <li class="stepItem disabled" onclick="goToStep(6)">
+                        <div class="stepNumber">6</div>
+                        <div>
+                            <div class="stepLabel">Settings</div>
                         </div>
                     </li>
                 </ul>
@@ -639,13 +668,18 @@
                 <!-- STEP 1: SELECT VIDEO -->
                 <div class="stepPanel active" id="step1">
                     <h2>🎬 Step 1: Select Video File</h2>
-                    <p class="description">Choose the video file you want to upload. Supported formats: MP4, WebM, MOV</p>
+                    <p class="description">Choose the video file you want to upload. Supported formats: MP4, WebM, MOV
+                    </p>
 
                     <div class="formGroup">
                         <label>Video File</label>
                         <div class="fileInput">
-                            <input type="file" id="videoFile" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" onchange="handleVideoSelect(event)">
-                            <label for="videoFile" class="fileInputLabel" id="videoLabel" ondrop="handleDrop(event, 'video')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                            <input type="file" id="videoFile"
+                                accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+                                onchange="handleVideoSelect(event)">
+                            <label for="videoFile" class="fileInputLabel" id="videoLabel"
+                                ondrop="handleDrop(event, 'video')" ondragover="handleDragOver(event)"
+                                ondragleave="handleDragLeave(event)">
                                 <div class="fileIcon">📹</div>
                                 <div>
                                     <strong>Click to browse</strong> or drag video here
@@ -658,20 +692,25 @@
                     <div id="videoPreview"></div>
 
                     <div class="buttonGroup">
-                        <button class="btnPrimary" onclick="nextStep(1)" id="nextBtn1" disabled>Next: Add Thumbnail →</button>
+                        <button class="btnPrimary" onclick="nextStep(1)" id="nextBtn1" disabled>Next: Add Thumbnail
+                            →</button>
                     </div>
                 </div>
 
                 <!-- STEP 2: SELECT THUMBNAIL -->
                 <div class="stepPanel" id="step2">
                     <h2>🖼️ Step 2: Add Thumbnail Image</h2>
-                    <p class="description">Upload a thumbnail image that will be shown in the gallery. Recommended: 16:9 aspect ratio</p>
+                    <p class="description">Upload a thumbnail image that will be shown in the gallery. Recommended: 16:9
+                        aspect ratio</p>
 
                     <div class="formGroup">
                         <label>Thumbnail Image</label>
                         <div class="fileInput">
-                            <input type="file" id="thumbnailFile" accept="image/jpeg,image/png,.jpg,.jpeg,.png" onchange="handleThumbnailSelect(event)">
-                            <label for="thumbnailFile" class="fileInputLabel" id="thumbnailLabel" ondrop="handleDrop(event, 'thumbnail')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                            <input type="file" id="thumbnailFile" accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                                onchange="handleThumbnailSelect(event)">
+                            <label for="thumbnailFile" class="fileInputLabel" id="thumbnailLabel"
+                                ondrop="handleDrop(event, 'thumbnail')" ondragover="handleDragOver(event)"
+                                ondragleave="handleDragLeave(event)">
                                 <div class="fileIcon">🖼️</div>
                                 <div>
                                     <strong>Click to browse</strong> or drag image here
@@ -719,6 +758,88 @@
                     <div class="buttonGroup">
                         <button class="btnSecondary" onclick="prevStep(3)">← Back: Thumbnail</button>
                         <button class="btnPrimary" onclick="uploadFiles()" id="uploadBtn">Upload Files</button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: MANAGE VIDEOS -->
+                <div class="stepPanel" id="step4">
+                    <h2>📹 Step 4: Manage Videos</h2>
+                    <p class="description">Edit video titles, delete videos, and view your content</p>
+
+                    <div class="formGroup">
+                        <label>Your Videos</label>
+                        <ul id="videoList" style="list-style: none; padding: 0;">
+                            <li>Loading videos...</li>
+                        </ul>
+                    </div>
+
+                    <div class="buttonGroup">
+                        <button class="btnSecondary" onclick="goToStep(1)">← Back: Upload More</button>
+                        <button class="btnPrimary" onclick="goToStep(5)">Next: Manage Codes →</button>
+                    </div>
+                </div>
+
+                <!-- STEP 5: MANAGE PROMO CODES -->
+                <div class="stepPanel" id="step5">
+                    <h2>🎫 Step 5: Manage Promo Codes</h2>
+                    <p class="description">Add and manage promotional codes that give access to your gallery</p>
+
+                    <div class="formGroup">
+                        <label>Add New Code</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="newCode" placeholder="e.g. SUMMER2026"
+                                style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #2563eb; background: rgba(15, 23, 42, 0.6); color: white;">
+                            <button class="btnPrimary" onclick="addCode()" style="padding: 10px 20px;">Add Code</button>
+                        </div>
+                    </div>
+
+                    <div class="formGroup">
+                        <label>Existing Codes</label>
+                        <ul id="codeList" style="list-style: none; padding: 0;">
+                            <li>Loading codes...</li>
+                        </ul>
+                    </div>
+
+                    <div class="buttonGroup">
+                        <button class="btnSecondary" onclick="goToStep(4)">← Back: Manage Videos</button>
+                        <button class="btnPrimary" onclick="goToStep(1)">⬆ Upload New Video</button>
+                    </div>
+                </div>
+
+                <!-- STEP 6: SETTINGS -->
+                <div class="stepPanel" id="step6">
+                    <h2>⚙️ Step 6: Settings</h2>
+                    <p class="description">Manage your admin password and two-factor authentication</p>
+
+                    <div class="formGroup">
+                        <label>Change Admin Password</label>
+                        <form onsubmit="changePassword(); return false;"
+                            style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <input type="password" id="newPassword" placeholder="New password"
+                                autocomplete="new-password"
+                                style="flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #2563eb; background: rgba(15, 23, 42, 0.6); color: white;">
+                            <input type="password" id="confirmPassword" placeholder="Confirm password"
+                                autocomplete="new-password"
+                                style="flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #2563eb; background: rgba(15, 23, 42, 0.6); color: white;">
+                            <button type="submit" class="btnPrimary" style="padding: 10px 20px;">Change
+                                Password</button>
+                        </form>
+                    </div>
+
+                    <div class="formGroup">
+                        <label>Two-Factor Authentication</label>
+                        <div
+                            style="background: rgba(15, 23, 42, 0.6); padding: 15px; border-radius: 8px; border-left: 3px solid #2563eb; margin-bottom: 10px;">
+                            <p style="color: #cbd5e1; margin-bottom: 15px;">Reset your 2FA configuration. You'll need to
+                                set up 2FA again on next login.</p>
+                            <button class="btnDanger" onclick="reset2FASetting()" style="padding: 10px 20px;">Reset 2FA
+                                Setup</button>
+                        </div>
+                    </div>
+
+                    <div class="buttonGroup">
+                        <button class="btnSecondary" onclick="goToStep(5)">← Back: Manage Codes</button>
+                        <button class="btnPrimary" onclick="goToStep(1)">⬆ Upload New Video</button>
                     </div>
                 </div>
 

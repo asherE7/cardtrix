@@ -1,17 +1,25 @@
 <?php
 
-$correctPassword = "a";
+session_start();
 
-if ($_POST["password"] !== $correctPassword) {
+header('Content-Type: application/json');
+
+$correctPassword = "a";
+$password = $_POST["password"] ?? '';
+
+// Verify password
+if ($password !== $correctPassword) {
     http_response_code(403);
-    echo "Invalid password";
+    echo json_encode(["success" => false, "message" => "Invalid password"]);
     exit;
 }
 
-
+// Set session after successful authentication
+$_SESSION['uploading'] = true;
 
 if (!isset($_FILES["video"])) {
-    echo "No video uploaded";
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "No video uploaded"]);
     exit;
 }
 
@@ -38,7 +46,8 @@ if (!move_uploaded_file(
     $videoPath
 )) {
 
-    echo "Video upload failed";
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "Video upload failed"]);
     exit;
 
 }
@@ -71,8 +80,6 @@ if (isset($_FILES["thumbnail"])) {
 
 }
 
-
-
-echo "Upload successful";
+echo json_encode(["success" => true, "message" => "Upload successful"]);
 
 ?>
