@@ -1,181 +1,850 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Video Management</title>
     <style>
-        .twoFAContainer {
-            max-width: 400px;
-            margin: 20px auto;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
             padding: 20px;
-            background: #1e293b;
-            border-radius: 10px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1em;
+        }
+
+        /* ==================== LOGIN SCREEN ==================== */
+        #loginScreen {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 400px;
+            margin: 0 auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        #loginScreen h2 {
+            margin-bottom: 30px;
+            color: #f1f5f9;
+        }
+
+        /* ==================== 2FA SCREEN ==================== */
+        #twoFAScreen {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .twoFAContainer {
+            width: 100%;
+        }
+
+        .twoFAContainer h2 {
+            margin-bottom: 25px;
+            color: #f1f5f9;
+        }
+
+        .instructions {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.8;
+            border-left: 4px solid #2563eb;
         }
 
         .qrCode {
             text-align: center;
-            margin: 20px 0;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
         }
 
         .qrCode img {
-            max-width: 300px;
+            max-width: 280px;
             border-radius: 8px;
             border: 2px solid #2563eb;
+            background: white;
+            padding: 10px;
         }
 
         .secretDisplay {
-            background: #0f172a;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            word-break: break-all;
-            margin: 10px 0;
-            border-left: 3px solid #2563eb;
-        }
-
-        .instructions {
-            background: #1e293b;
+            background: rgba(15, 23, 42, 0.8);
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
             margin: 15px 0;
-            font-size: 14px;
-            line-height: 1.6;
+            border-left: 3px solid #2563eb;
+            font-size: 13px;
         }
 
         .codeInput {
-            font-size: 32px !important;
-            letter-spacing: 5px;
+            font-size: 28px !important;
+            letter-spacing: 8px;
             text-align: center;
-            font-family: monospace;
-            width: 200px;
+            font-family: 'Courier New', monospace;
+            width: 250px;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid #2563eb;
+            border-radius: 8px;
+            color: #f1f5f9;
+            margin: 20px 0;
+        }
+
+        .codeInput:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+        }
+
+        /* ==================== ADMIN CONTENT ==================== */
+        #adminContent {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        /* ==================== STEP SIDEBAR ==================== */
+        .stepSidebar {
+            position: sticky;
+            top: 20px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 12px;
+            padding: 30px 20px;
+            height: fit-content;
+        }
+
+        .stepList {
+            list-style: none;
+        }
+
+        .stepItem {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            align-items: flex-start;
+        }
+
+        .stepItem.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stepNumber {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(148, 163, 184, 0.2);
+            color: #94a3b8;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .stepItem.active .stepNumber {
+            background: linear-gradient(45deg, #2563eb, #06b6d4);
+            color: white;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
+            transform: scale(1.1);
+        }
+
+        .stepItem.completed .stepNumber {
+            background: #10b981;
+            color: white;
+        }
+
+        .stepItem.completed .stepNumber::after {
+            content: "✓";
+            font-size: 18px;
+        }
+
+        .stepLabel {
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .stepItem.active .stepLabel {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        /* ==================== MAIN CONTENT AREA ==================== */
+        .mainContent {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .stepPanel {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .stepPanel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ==================== STEP CONTENT ==================== */
+        .stepPanel h2 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            color: #f1f5f9;
+        }
+
+        .stepPanel .description {
+            color: #cbd5e1;
+            margin-bottom: 30px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .formGroup {
+            margin-bottom: 25px;
+        }
+
+        .formGroup label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #f1f5f9;
+            font-size: 14px;
+        }
+
+        .fileInput {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .fileInput input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .fileInputLabel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
+            border: 2px dashed #2563eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #cbd5e1;
+        }
+
+        .fileInputLabel:hover {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+            border-color: #06b6d4;
+            color: #f1f5f9;
+        }
+
+        .fileInputLabel.dragover {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%);
+            border-color: #06b6d4;
+            transform: scale(1.02);
+        }
+
+        .fileIcon {
+            font-size: 32px;
+        }
+
+        .fileInfo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .fileInfo.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .fileInfo.success::before {
+            content: "✓";
+            font-size: 20px;
+            color: #10b981;
+        }
+
+        .fileSize {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        /* ==================== PREVIEW SECTION ==================== */
+        .previewSection {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .previewSection h3 {
+            color: #f1f5f9;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .previewGrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .previewItem {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .previewItem h4 {
+            color: #cbd5e1;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .previewItem img,
+        .previewItem video {
+            width: 100%;
+            border-radius: 6px;
+            max-height: 150px;
+            object-fit: cover;
+            background: black;
+        }
+
+        /* ==================== BUTTONS ==================== */
+        .buttonGroup {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            justify-content: flex-end;
+        }
+
+        button {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btnPrimary {
+            background: linear-gradient(45deg, #2563eb, #06b6d4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btnPrimary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(37, 99, 235, 0.4);
+        }
+
+        .btnPrimary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btnSecondary {
+            background: rgba(148, 163, 184, 0.2);
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .btnSecondary:hover {
+            background: rgba(148, 163, 184, 0.3);
+            color: #f1f5f9;
+        }
+
+        .btnDanger {
+            background: rgba(220, 38, 38, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .btnDanger:hover {
+            background: rgba(220, 38, 38, 0.3);
+            color: #fca5a5;
+        }
+
+        /* ==================== PROGRESS BAR ==================== */
+        .progressContainer {
+            margin: 30px 0;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            overflow: hidden;
+            height: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .progressBar {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #06b6d4);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+        }
+
+        /* ==================== STATUS MESSAGES ==================== */
+        .statusMessage {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+            display: none;
+        }
+
+        .statusMessage.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .statusMessage.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .statusMessage.error {
+            background: rgba(220, 38, 38, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .statusMessage.info {
+            background: rgba(37, 99, 235, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 768px) {
+            #adminContent {
+                grid-template-columns: 1fr;
+            }
+
+            .stepSidebar {
+                position: static;
+            }
+
+            .previewGrid {
+                grid-template-columns: 1fr;
+            }
+
+            .buttonGroup {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .mainContent {
+                padding: 25px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <h1>Admin Dashboard</h1>
+    <div class="container">
+        <header>
+            <h1>📹 Video Management</h1>
+            <p class="subtitle">Admin Dashboard</p>
+        </header>
 
-    <!-- Step 1: Password Login -->
-    <div id="loginScreen">
+        <!-- STEP 1: PASSWORD LOGIN -->
+        <div id="loginScreen">
+            <h2>Admin Access Required</h2>
+            <form onsubmit="return verifyPassword(event)">
+                <div class="formGroup">
+                    <label>Enter Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter admin password"
+                        autocomplete="current-password"
+                        style="width: 100%; padding: 12px; border: 1px solid #2563eb; border-radius: 8px; background: rgba(15, 23, 42, 0.6); color: #f1f5f9; font-size: 14px;"
+                        required>
+                </div>
+                <div class="buttonGroup" style="justify-content: center; margin-top: 30px;">
+                    <button type="submit" class="btnPrimary">Verify Password</button>
+                </div>
+            </form>
 
-        <h2>Enter Admin Password</h2>
+            <!-- Recovery link for first login after password change -->
+            <div id="recoveryLinkContainer"
+                style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #2563eb;">
+                <p style="color: #cbd5e1; margin-bottom: 10px;">Password not working? Try the old password:</p>
+                <button onclick="tryOldPassword()" class="btnSecondary" style="width: 100%;">Use Old Password
+                    (Recovery)</button>
+            </div>
+        </div>
 
-        <input type="password" id="adminPassword" placeholder="Password">
+        <!-- STEP 2: 2FA VERIFICATION -->
+        <div id="twoFAScreen" style="display:none;">
+            <div class="twoFAContainer">
+                <h2>🔐 Two-Factor Authentication</h2>
 
-        <br><br>
+                <!-- Setup Mode -->
+                <div id="setupMode" style="display:none;">
+                    <div class="instructions">
+                        <strong>First Time Setup:</strong><br>
+                        1. Download an authenticator app (Google Authenticator, Microsoft Authenticator, or Authy)<br>
+                        2. Scan the QR code below with your authenticator<br>
+                        3. Enter the 6-digit code
+                    </div>
 
-        <button onclick="verifyPassword()">
-            Next
-        </button>
+                    <div class="qrCode">
+                        <img id="qrCodeImg" src="" alt="QR Code">
+                    </div>
 
-    </div>
-
-    <!-- Step 2: 2FA Setup/Verify -->
-    <div id="twoFAScreen" style="display:none;">
-
-        <div class="twoFAContainer">
-
-            <h2>Two-Factor Authentication</h2>
-
-            <div id="setupMode" style="display:none;">
-
-                <div class="instructions">
-                    <strong>First Time Setup:</strong><br>
-                    1. Download an authenticator app:<br>
-                    &nbsp;&nbsp;• Google Authenticator<br>
-                    &nbsp;&nbsp;• Microsoft Authenticator<br>
-                    &nbsp;&nbsp;• Authy<br>
-                    2. Scan the QR code below<br>
-                    3. Enter the 6-digit code
+                    <div style="text-align: center; margin: 20px 0;">
+                        <small style="color: #94a3b8;">Or enter this code manually:</small>
+                        <div class="secretDisplay" id="secretDisplay"></div>
+                    </div>
                 </div>
 
-                <div class="qrCode">
-                    <img id="qrCodeImg" src="" alt="QR Code">
+                <!-- Verify Mode -->
+                <div id="verifyMode">
+                    <p style="margin-bottom: 20px; color: #cbd5e1;">Enter the 6-digit code from your authenticator app:
+                    </p>
                 </div>
 
-                <div style="text-align: center; margin: 15px 0;">
-                    <small>Can't scan? Enter manually:</small>
-                    <div class="secretDisplay" id="secretDisplay"></div>
+                <div style="text-align: center;">
+                    <input type="text" id="totpCode" class="codeInput" placeholder="000000" maxlength="6"
+                        inputmode="numeric">
+                </div>
+
+                <div class="buttonGroup" style="justify-content: center; margin-top: 30px;">
+                    <button class="btnSecondary" onclick="goBack()">Back</button>
+                    <button class="btnPrimary" onclick="verify2FA()">Verify & Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: UPLOAD WIZARD -->
+        <div id="adminContent" style="display:none;">
+            <!-- SIDEBAR WITH STEP INDICATORS -->
+            <div class="stepSidebar">
+                <ul class="stepList">
+                    <li class="stepItem active" onclick="goToStep(1)">
+                        <div class="stepNumber">1</div>
+                        <div>
+                            <div class="stepLabel">Select Video</div>
+                        </div>
+                    </li>
+                    <li class="stepItem disabled" onclick="goToStep(2)">
+                        <div class="stepNumber">2</div>
+                        <div>
+                            <div class="stepLabel">Add Thumbnail</div>
+                        </div>
+                    </li>
+                    <li class="stepItem disabled" onclick="goToStep(3)">
+                        <div class="stepNumber">3</div>
+                        <div>
+                            <div class="stepLabel">Review & Upload</div>
+                        </div>
+                    </li>
+                    <li class="stepItem disabled" onclick="goToStep(4)">
+                        <div class="stepNumber">4</div>
+                        <div>
+                            <div class="stepLabel">Manage Videos</div>
+                        </div>
+                    </li>
+                    <li class="stepItem disabled" onclick="goToStep(5)">
+                        <div class="stepNumber">5</div>
+                        <div>
+                            <div class="stepLabel">Manage Codes</div>
+                        </div>
+                    </li>
+                    <li class="stepItem disabled" onclick="goToStep(6)">
+                        <div class="stepNumber">6</div>
+                        <div>
+                            <div class="stepLabel">Settings</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- MAIN CONTENT -->
+            <div class="mainContent">
+
+                <!-- STEP 1: SELECT VIDEO -->
+                <div class="stepPanel active" id="step1">
+                    <h2>🎬 Step 1: Select Video File</h2>
+                    <p class="description">Choose the video file you want to upload. Supported formats: MP4, WebM, MOV
+                    </p>
+
+                    <div class="formGroup">
+                        <label>Video File</label>
+                        <div class="fileInput">
+                            <input type="file" id="videoFile"
+                                accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+                                onchange="handleVideoSelect(event)">
+                            <label for="videoFile" class="fileInputLabel" id="videoLabel"
+                                ondrop="handleDrop(event, 'video')" ondragover="handleDragOver(event)"
+                                ondragleave="handleDragLeave(event)">
+                                <div class="fileIcon">📹</div>
+                                <div>
+                                    <strong>Click to browse</strong> or drag video here
+                                </div>
+                            </label>
+                        </div>
+                        <div id="videoInfo"></div>
+                    </div>
+
+                    <div id="videoPreview"></div>
+
+                    <div class="buttonGroup">
+                        <button class="btnPrimary" onclick="nextStep(1)" id="nextBtn1" disabled>Next: Add Thumbnail
+                            →</button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: SELECT THUMBNAIL -->
+                <div class="stepPanel" id="step2">
+                    <h2>🖼️ Step 2: Add Thumbnail Image</h2>
+                    <p class="description">Upload a thumbnail image that will be shown in the gallery. Recommended: 16:9
+                        aspect ratio</p>
+
+                    <div class="formGroup">
+                        <label>Thumbnail Image</label>
+                        <div class="fileInput">
+                            <input type="file" id="thumbnailFile" accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                                onchange="handleThumbnailSelect(event)">
+                            <label for="thumbnailFile" class="fileInputLabel" id="thumbnailLabel"
+                                ondrop="handleDrop(event, 'thumbnail')" ondragover="handleDragOver(event)"
+                                ondragleave="handleDragLeave(event)">
+                                <div class="fileIcon">🖼️</div>
+                                <div>
+                                    <strong>Click to browse</strong> or drag image here
+                                </div>
+                            </label>
+                        </div>
+                        <div id="thumbnailInfo"></div>
+                    </div>
+
+                    <div id="thumbnailPreview"></div>
+
+                    <div class="buttonGroup">
+                        <button class="btnSecondary" onclick="prevStep(2)">← Back: Video</button>
+                        <button class="btnPrimary" onclick="nextStep(2)" id="nextBtn2" disabled>Next: Review →</button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: REVIEW & UPLOAD -->
+                <div class="stepPanel" id="step3">
+                    <h2>✅ Step 3: Review & Upload</h2>
+                    <p class="description">Review your files and click Upload to proceed</p>
+
+                    <div class="previewSection">
+                        <h3>Files Summary</h3>
+                        <div class="previewGrid">
+                            <div class="previewItem">
+                                <h4>Video File</h4>
+                                <div id="reviewVideoName" style="color: #cbd5e1; margin-bottom: 10px;"></div>
+                                <div id="reviewVideoPreview"></div>
+                            </div>
+                            <div class="previewItem">
+                                <h4>Thumbnail Image</h4>
+                                <div id="reviewThumbName" style="color: #cbd5e1; margin-bottom: 10px;"></div>
+                                <div id="reviewThumbPreview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="uploadStatus"></div>
+
+                    <div class="progressContainer">
+                        <div class="progressBar" id="progressBar"></div>
+                    </div>
+
+                    <div class="buttonGroup">
+                        <button class="btnSecondary" onclick="prevStep(3)">← Back: Thumbnail</button>
+                        <button class="btnPrimary" onclick="uploadFiles()" id="uploadBtn">Upload Files</button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: MANAGE VIDEOS -->
+                <div class="stepPanel" id="step4">
+                    <h2>📹 Step 4: Manage Videos</h2>
+                    <p class="description">Edit video titles, delete videos, and view your content</p>
+
+                    <div class="formGroup">
+                        <label>Your Videos</label>
+                        <ul id="videoList" style="list-style: none; padding: 0;">
+                            <li>Loading videos...</li>
+                        </ul>
+                    </div>
+
+                    <div class="buttonGroup">
+                        <button class="btnSecondary" onclick="goToStep(1)">← Back: Upload More</button>
+                        <button class="btnPrimary" onclick="goToStep(5)">Next: Manage Codes →</button>
+                    </div>
+                </div>
+
+                <!-- STEP 5: MANAGE PROMO CODES -->
+                <div class="stepPanel" id="step5">
+                    <h2>🎫 Step 5: Manage Promo Codes</h2>
+                    <p class="description">Add and manage promotional codes that give access to your gallery</p>
+
+                    <div class="formGroup">
+                        <label>Add New Code</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="newCode" placeholder="e.g. SUMMER2026"
+                                style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #2563eb; background: rgba(15, 23, 42, 0.6); color: white;">
+                            <button class="btnPrimary" onclick="addCode()" style="padding: 10px 20px;">Add Code</button>
+                        </div>
+                    </div>
+
+                    <div class="formGroup">
+                        <label>Existing Codes</label>
+                        <ul id="codeList" style="list-style: none; padding: 0;">
+                            <li>Loading codes...</li>
+                        </ul>
+                    </div>
+
+                    <div class="buttonGroup">
+                        <button class="btnSecondary" onclick="goToStep(4)">← Back: Manage Videos</button>
+                        <button class="btnPrimary" onclick="goToStep(1)">⬆ Upload New Video</button>
+                    </div>
+                </div>
+
+                <!-- STEP 6: SETTINGS -->
+                <div class="stepPanel" id="step6">
+                    <h2>⚙️ Step 6: Settings</h2>
+                    <p class="description">Manage your admin password and two-factor authentication</p>
+
+                    <div class="formGroup">
+                        <label>Change Admin Password</label>
+                        <form onsubmit="changePassword(); return false;"
+                            style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <input type="password" id="newPassword" placeholder="New password"
+                                autocomplete="new-password"
+                                style="flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #2563eb; background: rgba(15, 23, 42, 0.6); color: white;">
+                            <input type="password" id="confirmPassword" placeholder="Confirm password"
+                                autocomplete="new-password"
+                                style="flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #2563eb; background: rgba(15, 23, 42, 0.6); color: white;">
+                            <button type="submit" class="btnPrimary" style="padding: 10px 20px;">Change
+                                Password</button>
+                        </form>
+                    </div>
+
+                    <div class="formGroup">
+                        <label>Two-Factor Authentication</label>
+                        <div
+                            style="background: rgba(15, 23, 42, 0.6); padding: 15px; border-radius: 8px; border-left: 3px solid #2563eb; margin-bottom: 10px;">
+                            <p style="color: #cbd5e1; margin-bottom: 15px;">Reset your 2FA configuration. You'll need to
+                                set up 2FA again on next login.</p>
+                            <button class="btnDanger" onclick="reset2FASetting()" style="padding: 10px 20px;">Reset 2FA
+                                Setup</button>
+                        </div>
+                    </div>
+
+                    <div class="buttonGroup">
+                        <button class="btnSecondary" onclick="goToStep(5)">← Back: Manage Codes</button>
+                        <button class="btnPrimary" onclick="goToStep(1)">⬆ Upload New Video</button>
+                    </div>
                 </div>
 
             </div>
-
-            <div id="verifyMode">
-                <p>Enter the 6-digit code from your authenticator app:</p>
-            </div>
-
-            <input type="text" id="totpCode" class="codeInput" placeholder="000000" maxlength="6">
-
-            <br><br>
-
-            <button onclick="verify2FA()">
-                Verify & Login
-            </button>
-
-            <button onclick="goBack()" style="background: #6b7280;">
-                Back
-            </button>
-
         </div>
-
-    </div>
-
-    <!-- Step 3: Admin Content -->
-    <div id="adminContent" style="display:none;">
-
-        <h2>Upload Video</h2>
-
-        <label>Video File:</label>
-        <br>
-        <input type="file" id="videoFile" accept="video/*">
-
-        <br><br>
-
-        <label>Thumbnail Image:</label>
-        <br>
-        <input type="file" id="thumbnailFile" accept="image/jpeg,image/png">
-
-        <br><br>
-
-        <button onclick="uploadVideo()">
-            Upload Video + Thumbnail
-        </button>
-
-        <br><br>
-
-        <div id="progressBarContainer">
-            <div id="progressBar"></div>
-        </div>
-
-        <hr>
-
-        <h2>Promo Code Manager</h2>
-
-        <input type="text" id="newCode" placeholder="New promo code">
-
-        <button onclick="addCode()">
-            Add Code
-        </button>
-
-        <br><br>
-
-        <button onclick="loadCodes()">
-            Refresh Codes
-        </button>
-
-        <ul id="codeList"></ul>
-
-        <hr>
-
-        <h2>2FA Management</h2>
-
-        <button onclick="reset2FA()" style="background: #dc2626;">
-            Reset 2FA Setup
-        </button>
-
-        <p><small>Click to re-scan authenticator or use a different device</small></p>
 
     </div>
 

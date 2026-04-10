@@ -5,6 +5,8 @@ date_default_timezone_set('UTC');
 
 session_start();
 
+header('Content-Type: application/json');
+
 require_once "TOTP.php";
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
@@ -18,6 +20,20 @@ if (!is_dir("data")) {
 // GET CURRENT TOTP SECRET
 if ($action === 'getSecret') {
     
+    // VALIDATE PASSWORD FIRST - THIS IS THE KEY FIX
+    $password = $_GET['password'] ?? $_POST['password'] ?? '';
+    $correctPassword = "a"; // Your admin password
+    
+    if ($password !== $correctPassword) {
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid password'
+        ]);
+        exit;
+    }
+    
+    // Only proceed if password is correct
     if (file_exists($secretFile)) {
         // Return existing secret (already setup)
         echo json_encode([
